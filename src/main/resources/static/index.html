@@ -1,0 +1,591 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1e293b;
+        }
+
+        header {
+            background: #1e3a8a;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px #00000010;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            background: #2563eb;
+            cursor: pointer;
+            margin: 3px;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .delete-btn {
+            background: #dc2626;
+        }
+
+        .edit-btn {
+            background: #059669;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #eff6ff;
+        }
+
+        #message {
+            margin-top: 12px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px #00000010;
+    border-left: 5px solid #2563eb;
+}
+
+.stat-card h3 {
+    font-size: 15px;
+    color: #64748b;
+    margin: 0 0 12px;
+}
+
+.stat-card p {
+    font-size: 27px;
+    font-weight: bold;
+    color: #1e3a8a;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 450px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile Responsive Design */
+@media screen and (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+
+    input,
+    select,
+    button {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .card {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+        
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Employee Management System</h1>
+        <p>Manage your employees easily</p>
+    </header>
+
+    <div class="container">
+    
+    
+<div class="dashboard">
+    <div class="stat-card">
+        <h3>Total Employees</h3>
+        <p id="totalEmployees">0</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>Total Departments</h3>
+        <p id="totalDepartments">0</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>Average Salary</h3>
+        <p id="averageSalary">₹0</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>Highest Salary</h3>
+        <p id="highestSalary">₹0</p>
+    </div>
+</div>
+    
+
+        <div class="card">
+            <h2 id="formTitle">Add Employee</h2>
+
+            <form id="employeeForm">
+                <input type="hidden" id="employeeId">
+
+                <label>Employee Name</label>
+                <input type="text" id="name"
+                       placeholder="Enter employee name" required>
+
+                <label>Department</label>
+                <input type="text" id="department"
+                       placeholder="Enter department" required>
+
+                <label>Salary</label>
+                <input type="number" id="salary"
+                       placeholder="Enter salary" min="0"
+                       step="0.01" required>
+
+                <button type="submit" id="saveBtn">
+                    Add Employee
+                </button>
+
+                <button type="button" id="cancelBtn"
+                        style="display:none; background:#64748b;">
+                    Cancel Edit
+                </button>
+            </form>
+
+            <p id="message"></p>
+        </div>
+
+        <div class="card">
+            <h2>Employee List</h2>
+            <select id="departmentFilter" onchange="filterEmployees()">
+    <option value="">All Departments</option>
+    <option value="IT">IT</option>
+    <option value="HR">HR</option>
+    <option value="Finance">Finance</option>
+    <option value="Marketing">Marketing</option>
+    <option value="Sales">Sales</option>
+    <option value="Operations">Operations</option>
+</select>
+
+<select id="salaryFilter" onchange="filterEmployees()">
+    <option value="">All Salaries</option>
+    <option value="30000">Above ₹30,000</option>
+    <option value="40000">Above ₹40,000</option>
+    <option value="45000">Above ₹45,000</option>
+</select>
+
+<select id="sortFilter" onchange="filterEmployees()">
+    <option value="">Default Order</option>
+    <option value="salaryAsc">Salary: Low to High</option>
+    <option value="salaryDesc">Salary: High to Low</option>
+    <option value="nameAsc">Name: A to Z</option>
+</select>
+
+<button onclick="exportEmployees()" class="add-btn">
+    Export to CSV
+</button>
+            
+<input
+    type="text"
+    id="searchInput"
+    placeholder="Search by employee name or department..."
+    oninput="searchEmployees()"
+>
+            
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Salary</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="employeeTable">
+                        <tr>
+                            <td colspan="5">Loading employees...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    
+<script>
+    const apiUrl = "/employees";
+
+    async function loadEmployees() {
+        const response = await fetch(apiUrl);
+        const employees = await response.json();
+
+        const table = document.getElementById("employeeTable");
+        table.innerHTML = "";
+
+        if (employees.length === 0) {
+            table.innerHTML =
+                '<tr><td colspan="5">No employees found</td></tr>';
+            await updateDashboard();
+            return;
+        }
+
+        employees.forEach(employee => {
+            table.innerHTML += `
+                <tr>
+                    <td>${employee.id}</td>
+                    <td>${employee.name}</td>
+                    <td>${employee.department}</td>
+                    <td>₹${employee.salary}</td>
+                    <td>
+                        <button class="edit-btn"
+                            onclick="editEmployee(${employee.id})">
+                            Edit
+                        </button>
+                        <button class="delete-btn"
+                            onclick="deleteEmployee(${employee.id})">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        await updateDashboard();
+    }
+
+    loadEmployees();
+    
+    
+
+    document.getElementById("employeeForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const id = document.getElementById("employeeId").value;
+
+
+        const name = document.getElementById("name").value.trim();
+        const department = document.getElementById("department").value.trim();
+        const salary = Number(document.getElementById("salary").value);
+
+        if (!/^[a-zA-Z ]+$/.test(name)) {
+            alert("Name should contain only letters and spaces.");
+            return;
+        }
+
+        if (!department) {
+            alert("Please enter a department.");
+            return;
+        }
+
+        if (document.getElementById("salary").value === "" ||
+            !Number.isFinite(salary) || salary <= 0) {
+            alert("Salary must be greater than zero.");
+            return;
+        }
+
+        const employee = { name, department, salary };
+
+
+        const url = id ? `/employees/${id}` : "/employees";
+        const method = id ? "PUT" : "POST";
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(employee)
+            });
+
+            if (!response.ok) {
+                throw new Error("Could not save employee");
+            }
+
+            document.getElementById("employeeForm").reset();
+            document.getElementById("employeeId").value = "";
+            document.getElementById("formTitle").textContent = "Add Employee";
+            document.getElementById("saveBtn").textContent = "Add Employee";
+            document.getElementById("cancelBtn").style.display = "none";
+            document.getElementById("message").textContent =
+                "Employee saved successfully!";
+
+            await loadEmployees();
+        } catch (error) {
+            document.getElementById("message").textContent = error.message;
+        }
+    });
+
+    
+
+    async function editEmployee(id) {
+        const response = await fetch(`/employees/${id}`);
+        const employee = await response.json();
+
+        document.getElementById("employeeId").value = employee.id;
+        document.getElementById("name").value = employee.name;
+        document.getElementById("department").value = employee.department;
+        document.getElementById("salary").value = employee.salary;
+
+        document.getElementById("formTitle").textContent = "Edit Employee";
+        document.getElementById("saveBtn").textContent = "Update Employee";
+        document.getElementById("cancelBtn").style.display = "inline-block";
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    
+
+    async function deleteEmployee(id) {
+        if (!confirm("Are you sure you want to delete this employee?")) {
+            return;
+        }
+
+        const response = await fetch(`/employees/${id}`, {
+            method: "DELETE"
+        });
+
+        if (response.ok) {
+            document.getElementById("message").textContent =
+                "Employee deleted successfully!";
+            await loadEmployees();
+        } else {
+            alert("Failed to delete employee.");
+        }
+    }
+    
+
+    function searchEmployees() {
+        const searchText = document
+            .getElementById("searchInput")
+            .value.toLowerCase();
+
+        const rows = document.querySelectorAll("#employeeTable tr");
+
+        rows.forEach(row => {
+            const name = row.cells[1]?.textContent.toLowerCase() || "";
+            const department = row.cells[2]?.textContent.toLowerCase() || "";
+
+            if (name.includes(searchText) || department.includes(searchText)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    
+
+    async function updateDashboard() {
+        const response = await fetch("/employees");
+        const employees = await response.json();
+
+        const total = employees.length;
+
+        const departments = new Set(
+            employees.map(employee => employee.department)
+        );
+
+        const totalSalary = employees.reduce(
+            (sum, employee) => sum + employee.salary, 0
+        );
+
+        const highestSalary = employees.length
+            ? Math.max(...employees.map(employee => employee.salary))
+            : 0;
+
+        const averageSalary = total
+            ? totalSalary / total
+            : 0;
+
+        document.getElementById("totalEmployees").textContent = total;
+        document.getElementById("totalDepartments").textContent =
+            departments.size;
+
+        document.getElementById("averageSalary").textContent =
+            "₹" + averageSalary.toLocaleString("en-IN", {
+                maximumFractionDigits: 2
+            });
+
+        document.getElementById("highestSalary").textContent =
+            "₹" + highestSalary.toLocaleString("en-IN");
+    }
+
+    updateDashboard();
+   
+    
+    async function filterEmployees() {
+    	const sort = document.getElementById("sortFilter").value;
+        const department = document.getElementById("departmentFilter").value;
+        const salary = document.getElementById("salaryFilter").value;
+        const search = document.querySelector("input[placeholder*='Search']").value.toLowerCase();
+
+        const response = await fetch(apiUrl);
+        const employees = await response.json();
+
+        const filteredEmployees = employees.filter(emp => {
+            const matchDepartment =
+                !department || emp.department === department;
+
+            const matchSalary =
+                !salary || emp.salary > Number(salary);
+
+            const matchSearch =
+                emp.name.toLowerCase().includes(search) ||
+                emp.department.toLowerCase().includes(search);
+
+            return matchDepartment && matchSalary && matchSearch;
+        });
+        if (sort === "salaryAsc") {
+            filteredEmployees.sort((a, b) => a.salary - b.salary);
+        } else if (sort === "salaryDesc") {
+            filteredEmployees.sort((a, b) => b.salary - a.salary);
+        } else if (sort === "nameAsc") {
+            filteredEmployees.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        const table = document.getElementById("employeeTable");
+        table.innerHTML = "";
+
+        if (filteredEmployees.length === 0) {
+            table.innerHTML =
+                '<tr><td colspan="5">No employees found</td></tr>';
+            return;
+        }
+
+        filteredEmployees.forEach(emp => {
+            table.innerHTML += `
+                <tr>
+                    <td>${emp.id}</td>
+                    <td>${emp.name}</td>
+                    <td>${emp.department}</td>
+                    <td>₹${emp.salary}</td>
+                    <td>
+                        <button class="edit-btn"
+                            onclick="editEmployee(${emp.id})">Edit</button>
+                        <button class="delete-btn"
+                            onclick="deleteEmployee(${emp.id})">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+    
+    async function exportEmployees() {
+        const response = await fetch(apiUrl);
+        const employees = await response.json();
+
+        if (employees.length === 0) {
+            alert("No employees to export!");
+            return;
+        }
+
+        let csv = "ID,Name,Department,Salary\n";
+
+        employees.forEach(emp => {
+            const name = `"${String(emp.name).replace(/"/g, '""')}"`;
+            const department =
+                `"${String(emp.department).replace(/"/g, '""')}"`;
+
+            csv += `${emp.id},${name},${department},${emp.salary}\n`;
+        });
+
+        const blob = new Blob(["\uFEFF" + csv], {
+            type: "text/csv;charset=utf-8;"
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "employees.csv";
+        link.click();
+
+        URL.revokeObjectURL(url);
+    }
+
+
+</script>
+</body>
+</html>
+
